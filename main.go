@@ -12,6 +12,7 @@ func main () {
 	app := fiber.New()
 	
 	routes.IndexRoutes(app.Group("/"))
+	routes.AuthRoutes(app.Group("/auth"))
 	routes.UserRoutes(app.Group("/user"))
 
 	err:= config.InitializeMongoDB(config.Config("MONGO_URI"), config.Config("MONGO_DATABASE"))

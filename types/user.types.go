@@ -5,8 +5,8 @@ import (
 )
 type IUser struct {
 	ID  uuid.UUID `bson:"_id,omitempty" json:"id"`
-    username   string `json:"username" validate:"required"`
-    fName string `json:"fName" validate:"required"`
-    lName  string `json:"lName" validate:"required"`
-	authId   uuid.UUID `json:"authId" validate:"required"`
+    Username   string `json:"username" validate:"required"`
+    FName string `json:"fName" validate:"required"`
+    LName  string `json:"lName" validate:"required"`
+	// AuthId   uuid.UUID `json:"authId,omitempty" validate:"required"`
 }

@@ -32,7 +32,7 @@ func ValidateStruct(model interface{}) fiber.Handler {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"status":  400,
 				"success": false,
-				"error":   errors,
+				"error": errors,
 			})
 		}
 

@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreateUser(c *fiber.Ctx) error {
+func GetUser(c *fiber.Ctx) error {
 	var user models.User
 
 	if err := c.BodyParser(&user); err != nil {

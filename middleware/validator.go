@@ -1,6 +1,6 @@
 package middleware
 
-import  (
+import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"ecommerce-api/types"
@@ -10,8 +10,6 @@ var Validator = validator.New()
 
 func ValidateStruct(model interface{}) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var errors []*types.IError
-
 		if err := c.BodyParser(model); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"status":  400,
@@ -20,8 +18,8 @@ func ValidateStruct(model interface{}) fiber.Handler {
 			})
 		}
 
-		err := Validator.Struct(model)
-		if err != nil {
+		if err := Validator.Struct(model); err != nil {
+			var errors []*types.IError
 			for _, err := range err.(validator.ValidationErrors) {
 				var el types.IError
 				el.Field = err.Field()
@@ -29,10 +27,11 @@ func ValidateStruct(model interface{}) fiber.Handler {
 				el.Value = err.Param()
 				errors = append(errors, &el)
 			}
+
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"status":  400,
 				"success": false,
-				"error": errors,
+				"error":   errors,
 			})
 		}
 

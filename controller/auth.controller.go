@@ -3,13 +3,14 @@ package controller
 import (
 	"context"
 	"ecommerce-api/config"
+	"ecommerce-api/helpers"
 	"ecommerce-api/models"
+	"ecommerce-api/types"
+	"ecommerce-api/utils"
 	"time"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
-	"ecommerce-api/helpers"
-	"ecommerce-api/utils"
 )
 
 func CreateUser(c *fiber.Ctx) error {
@@ -29,10 +30,9 @@ func CreateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(&user); err != nil {
 		return helpers.RespondWithError(c, fiber.StatusBadRequest, "Invalid user data")
 	}
-	userCollection := config.MongoDatabase.Collection("users")
 
 	filter := bson.M{"username": user.Username}
-	err := userCollection.FindOne(context.Background(), filter).Decode(&user)
+	err := config.MongoDatabase.Collection("users").FindOne(context.Background(), filter).Decode(&user)
 	if err == nil {
 		return helpers.RespondWithError(c, fiber.StatusBadRequest, "User already exists")
 	}
@@ -44,8 +44,7 @@ func CreateUser(c *fiber.Ctx) error {
 	auth.CreatedAt = time.Now()
 	auth.UpdatedAt = time.Now()
 
-	authCollection := config.MongoDatabase.Collection("auths")
-	_, err = authCollection.InsertOne(context.Background(), auth)
+	_, err = config.MongoDatabase.Collection("auths").InsertOne(context.Background(), auth)
 	if err != nil {
 		return helpers.RespondWithError(c, fiber.StatusInternalServerError, "Failed to save auth details")
 	}
@@ -55,7 +54,7 @@ func CreateUser(c *fiber.Ctx) error {
 	user.UpdatedAt = time.Now()
 	user.AuthId = auth.ID
 
-	_, err = userCollection.InsertOne(context.Background(), user)
+	_, err = config.MongoDatabase.Collection("users").InsertOne(context.Background(), user)
 	if err != nil {
 		return helpers.RespondWithError(c, fiber.StatusInternalServerError, "Failed to save user details")
 	}
@@ -68,10 +67,43 @@ func CreateUser(c *fiber.Ctx) error {
 
 	filter = bson.M{"_id": auth.ID}
 
-	_, err = authCollection.UpdateOne(context.Background(), filter, update)
+	_, err = config.MongoDatabase.Collection("auths").UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return helpers.RespondWithError(c, fiber.StatusBadRequest, "Failed to create user")
 	}
 
 	return helpers.RespondWithSuccess(c, fiber.StatusCreated, user)
+}
+
+
+func LoginUser(c *fiber.Ctx) error {
+	var auth types.IAuth
+	var requestAuth types.IAuth
+	var user models.User
+
+	if err := c.BodyParser(&requestAuth); err != nil {
+		println(err.Error())
+		return helpers.RespondWithError(c, fiber.StatusBadRequest, "Invalid request payload")
+	}
+
+	err := config.MongoDatabase.Collection("users").FindOne(context.Background(), bson.M{"username": requestAuth.Username}).Decode(&user)
+	if err != nil{
+		return helpers.RespondWithError(c, fiber.StatusNotFound, "User not found")
+	}
+
+	_ = config.MongoDatabase.Collection("auths").FindOne(context.Background(), bson.M{"userId": user.ID}).Decode(&auth)
+
+    err = utils.CheckPasswordHash(auth.Password, requestAuth.Password)
+	if err != nil {
+        return helpers.RespondWithError(c, fiber.StatusUnauthorized, "Invalid credentials")
+    }
+	token := utils.GenerateToken(user.ID.String())
+
+	data := map[string]interface{}{
+		"token": token,
+		"user":  user,
+	}
+	
+	return helpers.RespondWithSuccess(c, fiber.StatusCreated, data)
+
 }

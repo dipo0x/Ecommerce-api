@@ -8,5 +8,6 @@ import (
 )
 
 func AuthRoutes(router fiber.Router) {
-    router.Post("/create",  middleware.ValidateStruct(new(types.IUser)), controller.CreateUser)
+    router.Post("/sign-up",  middleware.ValidateStruct(new(types.IUser)), controller.CreateUser)
+    router.Post("/login",  middleware.ValidateStruct(new(types.ILogin)), controller.LoginUser)
 }

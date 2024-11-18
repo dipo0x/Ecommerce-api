@@ -8,5 +8,4 @@ type IUser struct {
     Username   string `json:"username" validate:"required"`
     FName string `json:"fName" validate:"required"`
     LName  string `json:"lName" validate:"required"`
-	// AuthId   uuid.UUID `json:"authId,omitempty" validate:"required"`
 }

@@ -75,7 +75,6 @@ func CreateUser(c *fiber.Ctx) error {
 	return helpers.RespondWithSuccess(c, fiber.StatusCreated, user)
 }
 
-
 func LoginUser(c *fiber.Ctx) error {
 	var auth types.IAuth
 	var requestAuth types.IAuth
@@ -104,6 +103,5 @@ func LoginUser(c *fiber.Ctx) error {
 		"user":  user,
 	}
 	
-	return helpers.RespondWithSuccess(c, fiber.StatusCreated, data)
-
+	return helpers.RespondWithSuccess(c, fiber.StatusOK, data)
 }

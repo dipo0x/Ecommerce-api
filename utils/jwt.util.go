@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"github.com/golang-jwt/jwt/v5"
-	"time"
 	"ecommerce-api/config"
+	"time"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func GenerateToken( userId string) string {

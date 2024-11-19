@@ -1,10 +1,11 @@
 package routes
 
 import (
+	"ecommerce-api/controller"
+	"ecommerce-api/middleware"
 	"github.com/gofiber/fiber/v2"
-    "ecommerce-api/controller"
 )
 
 func UserRoutes(router fiber.Router) {
-    router.Get("/get", controller.GetUser)
+    router.Get("/get", middleware.ValidateToken(), controller.GetUser)
 }

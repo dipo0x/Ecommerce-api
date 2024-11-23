@@ -14,8 +14,8 @@ func GetUser(c *fiber.Ctx) error {
 			"error": "User not available"})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"status":  201,
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  200,
 		"success": true,
 		"data":  user,
 	})

@@ -19,7 +19,7 @@ func ValidateToken() fiber.Handler {
 		
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
-			return helpers.RespondWithError(c, fiber.StatusUnauthorized, "Missing Authorization header")
+			return helpers.RespondWithError(c, fiber.StatusUnauthorized, "Missing Authorization")
 		}
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")

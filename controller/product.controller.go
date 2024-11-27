@@ -22,7 +22,43 @@ func CreateProduct(c *fiber.Ctx) error {
 		return helpers.RespondWithError(c, fiber.StatusBadRequest, "Invalid request payload")
 	}
 
-	filter := bson.M{"name": product.Name}
+	filter := bson.M{"name": requestProduct.Name}
+	err := config.MongoDatabase.Collection("products").FindOne(context.Background(), filter).Decode(&product)
+	if err == nil {
+		return helpers.RespondWithError(c, fiber.StatusBadRequest, "Product with this title already exists")
+	}
+	
+	product.ID = uuid.New()
+	product.Name = requestProduct.Name
+	product.Price = requestProduct.Price
+	product.Quantity = requestProduct.Quantity
+	product.ImgSrc = requestProduct.ImgSrc
+	product.Description = requestProduct.Description
+	product.Category = requestProduct.Category
+
+	product.OwnerId = c.Locals("user").(models.User).ID
+	product.CreatedAt = time.Now()
+	product.UpdatedAt = time.Now()
+
+	_ , err = config.MongoDatabase.Collection("products").InsertOne(context.Background(), product)
+	if err != nil {
+		return helpers.RespondWithError(c, fiber.StatusInternalServerError, "Failed to save product details")
+	}
+
+	return helpers.RespondWithSuccess(c, fiber.StatusCreated, product)
+}
+
+func GetProduct(c *fiber.Ctx) error {
+	var product models.Product
+
+	var requestProduct types.IProduct
+
+	if err := c.BodyParser(&requestProduct); err != nil {
+		println(err.Error())
+		return helpers.RespondWithError(c, fiber.StatusBadRequest, "Invalid request payload")
+	}
+
+	filter := bson.M{"name": requestProduct.Name}
 	err := config.MongoDatabase.Collection("products").FindOne(context.Background(), filter).Decode(&product)
 	if err == nil {
 		return helpers.RespondWithError(c, fiber.StatusBadRequest, "Product with this title already exists")
